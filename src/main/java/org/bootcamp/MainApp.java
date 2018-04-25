@@ -2,21 +2,44 @@ package org.bootcamp;
 
 import org.bootcamp.service.InsuranceCalculationResult;
 import org.bootcamp.service.InsuranceCalculatorService;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public final class MainApp {
+@SpringBootApplication
+public class MainApp implements CommandLineRunner {
+
+    private final InsuranceCalculatorService service;
+
+    public MainApp(InsuranceCalculatorService service){
+        this.service = service;
+    }
 
     private static final String OUTPUT_FORMAT = "%s with id %s has total cost %.2f";
 
     public static void main(String[] args) {
+        SpringApplication.run(MainApp.class,args);
+    }
 
+
+    private static void printCalculationResult(InsuranceCalculationResult result) {
+
+        if (result != null) {
+            final String output = String.format(OUTPUT_FORMAT, result.getVehicleTypeName(), result.getId(), result.getCost());
+            System.out.println(output);
+        }
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
         final long startTime = System.currentTimeMillis();
 
         if (args.length >= 1) {
 
             final String path = args[0];
-            final InsuranceCalculatorService service = new InsuranceCalculatorService(path);
             final List<InsuranceCalculationResult> resultList1 = service.calculateAll();
             final List<InsuranceCalculationResult> resultList2 = service.getCostsHigherThan(1000);
 
@@ -37,14 +60,5 @@ public final class MainApp {
         final long endTime = System.currentTimeMillis();
 
         System.out.println((endTime - startTime) + " " + TimeUnit.MILLISECONDS.toString());
-    }
-
-
-    private static void printCalculationResult(InsuranceCalculationResult result) {
-
-        if (result != null) {
-            final String output = String.format(OUTPUT_FORMAT, result.getVehicleTypeName(), result.getId(), result.getCost());
-            System.out.println(output);
-        }
     }
 }
